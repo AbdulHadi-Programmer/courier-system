@@ -1,0 +1,126 @@
+{% extends 'core/base.html' %}
+{% load humanize %}
+
+{% block page_title %}My Dashboard{% endblock %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stats -->
+<div class="row g-2 mb-3 stat-row">
+    <div class="col-6 col-xl-3">
+        <div class="dash-stat">
+            <div class="dash-stat-icon orange"><i class="bi bi-box-seam"></i></div>
+            <div>
+                <div class="dash-stat-val">{{ stats.total_shipments }}</div>
+                <div class="dash-stat-lbl">My Shipments</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="dash-stat">
+            <div class="dash-stat-icon green"><i class="bi bi-check-circle"></i></div>
+            <div>
+                <div class="dash-stat-val">{{ stats.delivered }}</div>
+                <div class="dash-stat-lbl">Delivered</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="dash-stat">
+            <div class="dash-stat-icon blue"><i class="bi bi-truck"></i></div>
+            <div>
+                <div class="dash-stat-val">{{ stats.active }}</div>
+                <div class="dash-stat-lbl">Active</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="dash-stat dash-stat-highlight">
+            <div class="dash-stat-icon orange-fill"><i class="bi bi-wallet2"></i></div>
+            <div>
+                <div class="dash-stat-val" style="color: var(--orange);">Rs. {{ stats.revenue|floatformat:"2g"|intcomma }}</div>
+                <div class="dash-stat-lbl">Total Spent</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-2 mb-3">
+    <!-- Active Shipments + Table -->
+    <div class="col-lg-8">
+        {% if active_shipments %}
+        <div class="dash-card mb-2">
+            <div class="dash-card-head">
+                <span><i class="bi bi-truck"></i> Active Shipments</span>
+            </div>
+            {% for s in active_shipments %}
+            <div class="dash-list-item">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge-status badge-{{ s.status }}">{{ s.get_status_display }}</span>
+                    <div>
+                        <span class="tracking-number">{{ s.tracking_number }}</span>
+                        <div class="dash-sub">{{ s.sender_city }} → {{ s.receiver_city }} &middot; {{ s.receiver_name }}</div>
+                    </div>
+                </div>
+                <a href="{% url 'shipments:detail' s.pk %}" class="btn-outline-custom btn-sm-custom"><i class="bi bi-arrow-right"></i></a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="dash-card" style="padding: 0; overflow: hidden;">
+            <div class="dash-card-head" style="padding: 12px 16px; border-bottom: 1px solid var(--gray-100);">
+                <span><i class="bi bi-clock-history"></i> Recent Shipments</span>
+                <a href="{% url 'shipments:list' %}" class="btn-outline-custom btn-sm-custom">View All</a>
+            </div>
+            {% if recent_shipments %}
+            <div class="table-responsive">
+                <table class="table-custom">
+                    <thead><tr><th>Tracking #</th><th>Receiver</th><th>Route</th><th>Price</th><th>Status</th><th></th></tr></thead>
+                    <tbody>
+                        {% for s in recent_shipments %}
+                        <tr>
+                            <td><span class="tracking-number">{{ s.tracking_number }}</span></td>
+                            <td style="font-weight: 500; color: var(--gray-700);">{{ s.receiver_name }}</td>
+                            <td>{{ s.sender_city }} <i class="bi bi-arrow-right" style="font-size: 10px; color: var(--gray-300);"></i> {{ s.receiver_city }}</td>
+                            <td style="font-weight: 600; color: var(--gray-800);">Rs. {{ s.price|intcomma }}</td>
+                            <td><span class="badge-status badge-{{ s.status }}">{{ s.get_status_display }}</span></td>
+                            <td><a href="{% url 'shipments:detail' s.pk %}" class="btn-outline-custom btn-sm-custom"><i class="bi bi-eye"></i></a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="dash-empty">
+                <i class="bi bi-inbox"></i>
+                <div class="dash-empty-title">No shipments yet</div>
+                <div class="dash-empty-text">Create your first shipment to get started.</div>
+                <a href="{% url 'shipments:create' %}" class="btn-primary-custom" style="margin-top: 10px;"><i class="bi bi-plus-circle"></i> Create Shipment</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-lg-4">
+        <div class="dash-card mb-2">
+            <div class="dash-card-head"><span><i class="bi bi-lightning"></i> Quick Actions</span></div>
+            <div class="d-grid gap-2">
+                <a href="{% url 'shipments:create' %}" class="btn-primary-custom justify-content-center"><i class="bi bi-plus-circle"></i> Create Shipment</a>
+                <a href="{% url 'tracking:track' %}" class="btn-outline-custom justify-content-center"><i class="bi bi-search"></i> Track Shipment</a>
+                <a href="{% url 'shipments:list' %}" class="btn-outline-custom justify-content-center"><i class="bi bi-list-ul"></i> All Shipments</a>
+            </div>
+        </div>
+
+        <div class="dash-card">
+            <div class="dash-card-head"><span><i class="bi bi-graph-up"></i> Delivery Rate</span></div>
+            <div class="text-center">
+                <div class="dash-rate">{{ stats.delivery_rate }}%</div>
+                <div class="dash-sub" style="margin: 2px 0 8px;">Success Rate</div>
+                <div class="progress-custom"><div class="progress-fill" style="width: {{ stats.delivery_rate }}%"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

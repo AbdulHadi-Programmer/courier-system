@@ -1,0 +1,161 @@
+{% extends 'core/base.html' %}
+{% load humanize %}
+
+{% block page_title %}Admin Dashboard{% endblock %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stats -->
+<div class="row g-2 mb-3 stat-row">
+    <div class="col-6 col-xl-3">
+        <div class="dash-stat">
+            <div class="dash-stat-icon orange"><i class="bi bi-box-seam"></i></div>
+            <div>
+                <div class="dash-stat-val">{{ total_shipments }}</div>
+                <div class="dash-stat-lbl">Total Shipments</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="dash-stat">
+            <div class="dash-stat-icon green"><i class="bi bi-check-circle"></i></div>
+            <div>
+                <div class="dash-stat-val">{{ delivered }}</div>
+                <div class="dash-stat-lbl">Delivered</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="dash-stat">
+            <div class="dash-stat-icon blue"><i class="bi bi-people"></i></div>
+            <div>
+                <div class="dash-stat-val">{{ total_users }}</div>
+                <div class="dash-stat-lbl">Total Users</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="dash-stat dash-stat-highlight">
+            <div class="dash-stat-icon orange-fill"><i class="bi bi-wallet2"></i></div>
+            <div>
+                <div class="dash-stat-val" style="color: var(--orange);">Rs. {{ revenue|intcomma }}</div>
+                <div class="dash-stat-lbl">Revenue</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Second Row -->
+<div class="row g-2 mb-3">
+    <!-- Users -->
+    <div class="col-md-3">
+        <div class="dash-card h-100">
+            <div class="dash-card-head"><span><i class="bi bi-people-fill"></i> Users</span></div>
+            <div class="dash-kv-list">
+                <div class="dash-kv"><span><i class="bi bi-person"></i> Customers</span><strong>{{ total_customers }}</strong></div>
+                <div class="dash-kv"><span><i class="bi bi-person-badge"></i> Staff</span><strong>{{ total_staff }}</strong></div>
+                <div class="dash-kv"><span><i class="bi bi-shield-check"></i> Admins</span><strong>{{ total_admins }}</strong></div>
+            </div>
+            <a href="{% url 'administration:user_list' %}" class="btn-outline-custom btn-sm-custom w-100 justify-content-center" style="margin-top: 12px;"><i class="bi bi-people"></i> Manage Users</a>
+        </div>
+    </div>
+
+    <!-- Order Status -->
+    <div class="col-md-4">
+        <div class="dash-card h-100">
+            <div class="dash-card-head"><span><i class="bi bi-pie-chart"></i> Order Status</span></div>
+            <div class="dash-status-list">
+                {% for status_val, count in status_counts.items %}
+                <div class="dash-status-row">
+                    <span class="badge-status badge-{{ status_val }}">{{ status_val|title }}</span>
+                    <strong>{{ count }}</strong>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Today + Quick Actions -->
+    <div class="col-md-5">
+        <div class="dash-card h-100">
+            <div class="dash-card-head"><span><i class="bi bi-calendar-check"></i> Today's Activity</span></div>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <div class="dash-mini-stat">
+                        <div class="dash-mini-val">{{ today_shipments }}</div>
+                        <div class="dash-mini-lbl">New Orders</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="dash-mini-stat">
+                        <div class="dash-mini-val" style="color: var(--green);">{{ delivery_rate }}%</div>
+                        <div class="dash-mini-lbl">Delivery Rate</div>
+                    </div>
+                </div>
+            </div>
+            <div class="progress-custom mb-3"><div class="progress-fill" style="width: {{ delivery_rate }}%"></div></div>
+            <div class="dash-card-head" style="margin-top: 4px;"><span><i class="bi bi-lightning"></i> Quick Actions</span></div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'administration:user_list' %}" class="btn-outline-custom btn-sm-custom"><i class="bi bi-people"></i> Users</a>
+                <a href="{% url 'administration:shipment_management' %}" class="btn-outline-custom btn-sm-custom"><i class="bi bi-box-seam"></i> Shipments</a>
+                <a href="{% url 'tracking:track' %}" class="btn-outline-custom btn-sm-custom"><i class="bi bi-search"></i> Track</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Users + Orders -->
+<div class="row g-2">
+    <div class="col-md-5">
+        <div class="dash-card" style="padding: 0; overflow: hidden;">
+            <div class="dash-card-head" style="padding: 12px 16px; border-bottom: 1px solid var(--gray-100);">
+                <span><i class="bi bi-person-plus"></i> Recent Users</span>
+                <a href="{% url 'administration:user_list' %}" class="btn-outline-custom btn-sm-custom">View All</a>
+            </div>
+            <div style="padding: 0 16px;">
+                {% for u in recent_users %}
+                <div class="dash-list-item" style="padding: 8px 0;">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="dash-user-av"><i class="bi bi-person"></i></div>
+                        <div>
+                            <div style="font-size: 13px; font-weight: 600; color: var(--gray-800);">{{ u.get_full_name|default:u.username }}</div>
+                            <div class="dash-sub">{{ u.email }}</div>
+                        </div>
+                    </div>
+                    <span class="top-bar-role role-{{ u.role }}" style="font-size: 10px;">{{ u.get_role_display }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="dash-card" style="padding: 0; overflow: hidden;">
+            <div class="dash-card-head" style="padding: 12px 16px; border-bottom: 1px solid var(--gray-100);">
+                <span><i class="bi bi-clock-history"></i> Recent Orders</span>
+                <a href="{% url 'administration:shipment_management' %}" class="btn-outline-custom btn-sm-custom">View All</a>
+            </div>
+            {% if recent_shipments %}
+            <div class="table-responsive">
+                <table class="table-custom">
+                    <thead><tr><th>Tracking</th><th>Route</th><th>Price</th><th>Status</th><th></th></tr></thead>
+                    <tbody>
+                        {% for s in recent_shipments %}
+                        <tr>
+                            <td><span class="tracking-number">{{ s.tracking_number }}</span></td>
+                            <td style="font-size: 12px;">{{ s.sender_city }} → {{ s.receiver_city }}</td>
+                            <td style="font-weight: 600; color: var(--gray-800); font-size: 12px;">Rs. {{ s.price|intcomma }}</td>
+                            <td><span class="badge-status badge-{{ s.status }}">{{ s.get_status_display }}</span></td>
+                            <td><a href="{% url 'shipments:detail' s.pk %}" class="btn-outline-custom btn-sm-custom"><i class="bi bi-eye"></i></a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="dash-empty"><i class="bi bi-inbox"></i><div class="dash-empty-text">No shipments.</div></div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

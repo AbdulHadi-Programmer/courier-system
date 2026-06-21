@@ -1,0 +1,248 @@
+{% extends 'core/base.html' %}
+{% load humanize %}
+
+{% block page_title %}Shipment Details{% endblock %}
+{% block title %}{{ shipment.tracking_number }}{% endblock %}
+
+{% block content %}
+<!-- Hero Banner -->
+<div class="sd-hero">
+    <div class="sd-hero-glow"></div>
+    <div class="sd-hero-inner">
+        <div class="sd-hero-top">
+            <div class="sd-hero-left">
+                <div class="sd-icon-box">
+                    {% if shipment.status == 'delivered' %}
+                    <i class="bi bi-check-circle-fill"></i>
+                    {% elif shipment.status == 'cancelled' %}
+                    <i class="bi bi-x-circle-fill"></i>
+                    {% elif shipment.status == 'returned' %}
+                    <i class="bi bi-arrow-return-left"></i>
+                    {% elif shipment.status == 'in_transit' %}
+                    <i class="bi bi-truck"></i>
+                    {% elif shipment.status == 'out_for_delivery' %}
+                    <i class="bi bi-bicycle"></i>
+                    {% else %}
+                    <i class="bi bi-box-seam-fill"></i>
+                    {% endif %}
+                </div>
+                <div>
+                    <div class="sd-trk">{{ shipment.tracking_number }}</div>
+                    <div class="sd-meta">
+                        <span class="sd-status-pill badge-{{ shipment.status }}">{{ shipment.get_status_display }}</span>
+                        <span class="sd-date"><i class="bi bi-calendar3"></i> {{ shipment.created_at|date:"M d, Y" }}</span>
+                        <span class="sd-date"><i class="bi bi-clock"></i> {{ shipment.created_at|date:"h:i A" }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sd-actions">
+                {% if request.user.role == 'staff' or request.user.role == 'admin' %}
+                    {% if shipment.next_status %}
+                    <a href="{% url 'tracking:progress' shipment.pk %}" class="sd-act-btn act-white"><i class="bi bi-arrow-right-circle"></i> Next Status</a>
+                    <a href="{% url 'tracking:complete' shipment.pk %}" class="sd-act-btn act-white-green"><i class="bi bi-lightning-fill"></i> Complete</a>
+                    {% endif %}
+                    {% if shipment.is_active %}
+                    <a href="{% url 'shipments:cancel' shipment.pk %}" class="sd-act-btn act-glass" onclick="return confirm('Cancel this shipment?')"><i class="bi bi-x-circle"></i> Cancel</a>
+                    {% endif %}
+                    {% if shipment.status == 'delivered' %}
+                    <a href="{% url 'shipments:return_shipment' shipment.pk %}" class="sd-act-btn act-glass" onclick="return confirm('Return this shipment?')"><i class="bi bi-arrow-return-left"></i> Return</a>
+                    {% endif %}
+                {% elif shipment.is_active and shipment.status == 'pending' %}
+                    <a href="{% url 'shipments:cancel' shipment.pk %}" class="sd-act-btn act-glass" onclick="return confirm('Cancel this shipment?')"><i class="bi bi-x-circle"></i> Cancel</a>
+                {% endif %}
+            </div>
+        </div>
+        <!-- Stats Row -->
+        <div class="sd-stats">
+            <div class="sd-stat">
+                <div class="sd-stat-label">Total Cost</div>
+                <div class="sd-stat-val sd-stat-price">Rs. {{ shipment.price|intcomma }}</div>
+            </div>
+            <div class="sd-stat">
+                <div class="sd-stat-label">Service</div>
+                <div class="sd-stat-val">{{ shipment.get_service_type_display }}</div>
+            </div>
+            <div class="sd-stat">
+                <div class="sd-stat-label">Weight</div>
+                <div class="sd-stat-val">{{ shipment.weight }} KG</div>
+            </div>
+            <div class="sd-stat">
+                <div class="sd-stat-label">Items</div>
+                <div class="sd-stat-val">{{ shipment.quantity }}</div>
+            </div>
+            <div class="sd-stat">
+                <div class="sd-stat-label">Est. Delivery</div>
+                <div class="sd-stat-val">{{ shipment.estimated_delivery|date:"M d, Y" }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progress -->
+{% if shipment.status not in 'cancelled,returned' %}
+<div class="sd-progress-wrap">
+    {% with current=shipment.status %}
+    <div class="sd-step {% if current == 'pending' %}active{% elif current != 'pending' %}done{% endif %}">
+        <div class="sd-dot"><i class="bi bi-clipboard-check"></i></div>
+        <div class="sd-step-info">
+            <span class="sd-step-name">Pending</span>
+            <span class="sd-step-sub">Order placed</span>
+        </div>
+    </div>
+    <div class="sd-line {% if current == 'picked_up' or current == 'in_transit' or current == 'out_for_delivery' or current == 'delivered' %}done{% endif %}"></div>
+    <div class="sd-step {% if current == 'picked_up' %}active{% elif current == 'in_transit' or current == 'out_for_delivery' or current == 'delivered' %}done{% endif %}">
+        <div class="sd-dot"><i class="bi bi-bag-check-fill"></i></div>
+        <div class="sd-step-info">
+            <span class="sd-step-name">Picked Up</span>
+            <span class="sd-step-sub">Collected</span>
+        </div>
+    </div>
+    <div class="sd-line {% if current == 'in_transit' or current == 'out_for_delivery' or current == 'delivered' %}done{% endif %}"></div>
+    <div class="sd-step {% if current == 'in_transit' %}active{% elif current == 'out_for_delivery' or current == 'delivered' %}done{% endif %}">
+        <div class="sd-dot"><i class="bi bi-truck"></i></div>
+        <div class="sd-step-info">
+            <span class="sd-step-name">In Transit</span>
+            <span class="sd-step-sub">On the way</span>
+        </div>
+    </div>
+    <div class="sd-line {% if current == 'out_for_delivery' or current == 'delivered' %}done{% endif %}"></div>
+    <div class="sd-step {% if current == 'out_for_delivery' %}active{% elif current == 'delivered' %}done{% endif %}">
+        <div class="sd-dot"><i class="bi bi-bicycle"></i></div>
+        <div class="sd-step-info">
+            <span class="sd-step-name">Out for Delivery</span>
+            <span class="sd-step-sub">Almost there</span>
+        </div>
+    </div>
+    <div class="sd-line {% if current == 'delivered' %}done{% endif %}"></div>
+    <div class="sd-step {% if current == 'delivered' %}done active{% endif %}">
+        <div class="sd-dot"><i class="bi bi-check-circle-fill"></i></div>
+        <div class="sd-step-info">
+            <span class="sd-step-name">Delivered</span>
+            <span class="sd-step-sub">Complete</span>
+        </div>
+    </div>
+    {% endwith %}
+</div>
+{% else %}
+<div class="sd-cancelled-bar {% if shipment.status == 'cancelled' %}type-cancel{% else %}type-return{% endif %}">
+    <i class="bi {% if shipment.status == 'cancelled' %}bi-x-circle-fill{% else %}bi-arrow-return-left{% endif %}"></i>
+    <div>
+        <strong>Shipment {{ shipment.get_status_display }}</strong>
+        <span>This shipment is no longer active.</span>
+    </div>
+</div>
+{% endif %}
+
+<!-- Route: From → To -->
+<div class="sd-two-col">
+    <div class="sd-route-card sd-from-card">
+        <div class="sd-rc-badge from">PICKUP</div>
+        <div class="sd-rc-name">{{ shipment.sender_name }}</div>
+        <div class="sd-rc-details">
+            <div><i class="bi bi-telephone-fill"></i> {{ shipment.sender_phone }}</div>
+            <div><i class="bi bi-geo-alt-fill"></i> {{ shipment.sender_city }}</div>
+        </div>
+        <div class="sd-rc-address">
+            <i class="bi bi-pin-map-fill"></i>
+            <span>{{ shipment.sender_address }}</span>
+        </div>
+    </div>
+    <div class="sd-route-mid">
+        <div class="sd-route-arrow"><i class="bi bi-arrow-right-short"></i></div>
+    </div>
+    <div class="sd-route-card sd-to-card">
+        <div class="sd-rc-badge to">DELIVERY</div>
+        <div class="sd-rc-name">{{ shipment.receiver_name }}</div>
+        <div class="sd-rc-details">
+            <div><i class="bi bi-telephone-fill"></i> {{ shipment.receiver_phone }}</div>
+            <div><i class="bi bi-geo-alt-fill"></i> {{ shipment.receiver_city }}</div>
+        </div>
+        <div class="sd-rc-address">
+            <i class="bi bi-pin-map-fill"></i>
+            <span>{{ shipment.receiver_address }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- Package -->
+<div class="sd-pkg-card">
+    <div class="sd-pkg-head">
+        <i class="bi bi-box-seam-fill"></i> Package Details
+    </div>
+    <div class="sd-pkg-grid">
+        <div class="sd-pkg-item">
+            <div class="sd-pkg-icon"><i class="bi bi-speedometer"></i></div>
+            <div class="sd-pkg-val">{{ shipment.weight }}<small>KG</small></div>
+            <div class="sd-pkg-lbl">Weight</div>
+        </div>
+        <div class="sd-pkg-item">
+            <div class="sd-pkg-icon"><i class="bi bi-stack"></i></div>
+            <div class="sd-pkg-val">{{ shipment.quantity }}</div>
+            <div class="sd-pkg-lbl">Items</div>
+        </div>
+        <div class="sd-pkg-item">
+            <div class="sd-pkg-icon"><i class="bi bi-archive"></i></div>
+            <div class="sd-pkg-val sd-pkg-txt">{{ shipment.get_package_type_display }}</div>
+            <div class="sd-pkg-lbl">Type</div>
+        </div>
+        <div class="sd-pkg-item">
+            <div class="sd-pkg-icon"><i class="bi bi-lightning-charge"></i></div>
+            <div class="sd-pkg-val sd-pkg-txt">{{ shipment.get_service_type_display }}</div>
+            <div class="sd-pkg-lbl">Service</div>
+        </div>
+    </div>
+    {% if shipment.description %}
+    <div class="sd-pkg-desc">{{ shipment.description }}</div>
+    {% endif %}
+</div>
+
+<!-- Bottom -->
+<div class="sd-bottom">
+    {% if request.user.role == 'staff' or request.user.role == 'admin' %}
+    {% if shipment.is_active %}
+    <div class="sd-update-box">
+        <div class="sd-section-head"><i class="bi bi-pencil-square"></i> Update Status</div>
+        <form method="post" action="{% url 'shipments:update_status' shipment.pk %}">
+            {% csrf_token %}
+            <label class="form-label">New Status</label>
+            <select name="status" class="form-select mb-3">
+                <option value="{{ shipment.status }}" selected>{{ shipment.get_status_display }} (Current)</option>
+                {% if shipment.next_status %}
+                <option value="{{ shipment.next_status }}">{{ next_status_label }}</option>
+                {% endif %}
+                <option value="cancelled">Cancelled</option>
+            </select>
+            <label class="form-label">Notes</label>
+            <input type="text" name="notes" class="form-control mb-3" placeholder="Optional note...">
+            <button type="submit" class="btn-primary-custom w-100 justify-content-center"><i class="bi bi-check-lg"></i> Update</button>
+        </form>
+    </div>
+    {% endif %}
+    {% endif %}
+    <div class="sd-history-box">
+        <div class="sd-section-head"><i class="bi bi-clock-history"></i> Tracking History</div>
+        {% if updates %}
+        <div class="sd-tl">
+            {% for u in updates %}
+            <div class="sd-tl-item {% if forloop.first %}first{% endif %}">
+                <div class="sd-tl-dot {% if forloop.first %}glow{% endif %}"></div>
+                <div class="sd-tl-card">
+                    <div class="sd-tl-row">
+                        <span class="badge-status badge-{{ u.status }}">{{ u.get_status_display }}</span>
+                        <span class="sd-tl-time">{{ u.timestamp|date:"M d, Y · h:i A" }}</span>
+                    </div>
+                    {% if u.location %}<div class="sd-tl-loc"><i class="bi bi-geo-alt"></i> {{ u.location }}</div>{% endif %}
+                    {% if u.notes %}<div class="sd-tl-note">{{ u.notes }}</div>{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="sd-no-data">
+            <i class="bi bi-inbox"></i>
+            <p>No tracking updates yet</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends 'core/base.html' %}
+
+{% block page_title %}User Management{% endblock %}
+{% block title %}User Management{% endblock %}
+
+{% block content %}
+<!-- Inline Create User Form -->
+<div class="card-custom card-no-hover mb-3" id="createUserCard" style="display: {% if show_form %}block{% else %}none{% endif %}; animation: fadeUp 0.3s ease;">
+    <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+        <div class="stat-icon stat-icon-info"><i class="bi bi-person-plus-fill"></i></div>
+        <div>
+            <div style="font-size: 15px; font-weight: 600; color: var(--gray-900);">Create New User</div>
+            <div style="font-size: 12px; color: var(--gray-400);">Add a new staff member or customer account</div>
+        </div>
+        <button type="button" class="btn-outline-custom btn-sm-custom ms-auto" onclick="document.getElementById('createUserCard').style.display='none'"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    {% if form.errors %}
+    <div class="alert-custom alert-danger-custom mb-3">
+        <i class="bi bi-exclamation-circle"></i>
+        <div>{% for field in form %}{% for error in field.errors %}<div>{{ error }}</div>{% endfor %}{% endfor %}{% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}</div>
+    </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+            <div class="col-md-3"><label class="form-label">First Name</label>{{ form.first_name }}</div>
+            <div class="col-md-3"><label class="form-label">Last Name</label>{{ form.last_name }}</div>
+            <div class="col-md-3"><label class="form-label">Username</label>{{ form.username }}</div>
+            <div class="col-md-3"><label class="form-label">Role</label>{{ form.role }}</div>
+            <div class="col-md-3"><label class="form-label">Email</label>{{ form.email }}</div>
+            <div class="col-md-3"><label class="form-label">Phone</label>{{ form.phone }}</div>
+            <div class="col-md-3"><label class="form-label">Password</label>{{ form.password1 }}</div>
+            <div class="col-md-3"><label class="form-label">Confirm Password</label>{{ form.password2 }}</div>
+        </div>
+        <div class="mt-3">
+            <button type="submit" class="btn-primary-custom"><i class="bi bi-person-plus"></i> Create User</button>
+        </div>
+    </form>
+</div>
+
+<!-- Toolbar -->
+<div class="sl-toolbar">
+    <div class="sl-filters">
+        <a href="?role=customer{% if search_query %}&q={{ search_query }}{% endif %}" class="sl-filter {% if current_role == 'customer' or not current_role %}active{% endif %}">Customers</a>
+        <a href="?role=staff{% if search_query %}&q={{ search_query }}{% endif %}" class="sl-filter {% if current_role == 'staff' %}active{% endif %}">Staff</a>
+    </div>
+    <div class="sl-right">
+        <form method="get" class="sl-search">
+            {% if current_role %}<input type="hidden" name="role" value="{{ current_role }}">{% endif %}
+            <i class="bi bi-search"></i>
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Search users...">
+            {% if search_query %}
+            <a href="{% url 'administration:user_list' %}{% if current_role %}?role={{ current_role }}{% endif %}" class="sl-search-clear"><i class="bi bi-x"></i></a>
+            {% endif %}
+        </form>
+        <button type="button" class="btn-primary-custom" onclick="let c=document.getElementById('createUserCard'); c.style.display=c.style.display==='none'?'block':'none';">
+            <i class="bi bi-person-plus"></i> Create User
+        </button>
+    </div>
+</div>
+
+{% if search_query %}
+<div class="sl-result-info">
+    <i class="bi bi-funnel-fill"></i> Results for "<strong>{{ search_query }}</strong>" &middot; {{ users|length }} found
+</div>
+{% endif %}
+
+<!-- Users Table -->
+{% if users %}
+<div class="dash-card" style="padding: 0; overflow: hidden;">
+    <div class="table-responsive">
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Account #</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td>
+                        <div style="font-weight: 600; color: var(--gray-800);">{{ u.get_full_name|default:u.username }}</div>
+                        <div style="font-size: 11px; color: var(--gray-400);">@{{ u.username }}</div>
+                    </td>
+                    <td><span style="font-family: 'SF Mono','Consolas',monospace; font-size: 11px; font-weight: 600; color: var(--orange);">{{ u.account_number|default:"-" }}</span></td>
+                    <td style="font-size: 12px;">{{ u.email|default:"-" }}</td>
+                    <td style="font-size: 12px;">{{ u.phone|default:"-" }}</td>
+                    <td><span class="top-bar-role role-{{ u.role }}">{{ u.get_role_display }}</span></td>
+                    <td>
+                        {% if u.is_active %}
+                        <span style="font-size: 11px; font-weight: 600; color: var(--green);"><i class="bi bi-circle-fill" style="font-size: 6px; vertical-align: middle;"></i> Active</span>
+                        {% else %}
+                        <span style="font-size: 11px; font-weight: 600; color: var(--red);"><i class="bi bi-circle-fill" style="font-size: 6px; vertical-align: middle;"></i> Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size: 12px; color: var(--gray-400);">{{ u.date_joined|date:"M d, Y" }}</td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="{% url 'administration:user_edit' u.pk %}" class="btn-outline-custom btn-sm-custom"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'administration:user_delete' u.pk %}" class="btn-danger-custom" onclick="return confirm('Delete user {{ u.username }}? This cannot be undone.')"><i class="bi bi-trash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="dash-card dash-empty" style="padding: 48px 20px;">
+    <i class="bi bi-people"></i>
+    <div class="dash-empty-title">No users found</div>
+    <div class="dash-empty-text">{% if search_query %}No users match your search.{% else %}Try a different filter.{% endif %}</div>
+</div>
+{% endif %}
+{% endblock %}
+

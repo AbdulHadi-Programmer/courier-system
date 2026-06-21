@@ -1,0 +1,64 @@
+{% extends 'core/base.html' %}
+
+{% block page_title %}My Profile{% endblock %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <!-- Profile Info Card -->
+        <div class="card-custom card-no-hover mb-3" style="animation: fadeUp 0.3s ease;">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="profile-avatar" style="width: 48px; height: 48px; font-size: 20px;"><i class="bi bi-person-fill"></i></div>
+                <div>
+                    <div style="font-size: 16px; font-weight: 600; color: var(--gray-900);">{{ user.get_full_name|default:user.username }}</div>
+                    <div style="font-size: 12px; color: var(--gray-400);">@{{ user.username }}</div>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="detail-label">Account Number</div>
+                    <div style="font-family: 'SF Mono', 'Consolas', monospace; font-size: 13px; font-weight: 600; color: var(--orange);">{{ user.account_number|default:"—" }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="detail-label">Role</div>
+                    <div><span class="top-bar-role role-{{ user.role }}">{{ user.get_role_display }}</span></div>
+                </div>
+                <div class="col-md-4">
+                    <div class="detail-label">Member Since</div>
+                    <div class="detail-value">{{ user.date_joined|date:"M d, Y" }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value">{{ user.email|default:"—" }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="detail-label">Phone</div>
+                    <div class="detail-value">{{ user.phone|default:"—" }}</div>
+                </div>
+                <div class="col-md-4">
+                    <div class="detail-label">City</div>
+                    <div class="detail-value">{{ user.city|default:"—" }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Form -->
+        <div class="card-custom card-no-hover" style="animation: fadeUp 0.3s ease backwards; animation-delay: 0.05s;">
+            <div class="section-heading"><i class="bi bi-pencil-square"></i> Edit Profile</div>
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label">First Name</label>{{ form.first_name }}</div>
+                    <div class="col-md-6"><label class="form-label">Last Name</label>{{ form.last_name }}</div>
+                    <div class="col-md-6"><label class="form-label">Email</label>{{ form.email }}</div>
+                    <div class="col-md-6"><label class="form-label">Phone</label>{{ form.phone }}</div>
+                    <div class="col-12"><label class="form-label">City</label>{{ form.city }}</div>
+                    <div class="col-12"><label class="form-label">Address</label>{{ form.address }}</div>
+                </div>
+                <button type="submit" class="btn-primary-custom mt-4"><i class="bi bi-check-lg"></i> Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

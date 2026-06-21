@@ -1,0 +1,151 @@
+{% extends 'core/base.html' %}
+{% load humanize %}
+
+{% block page_title %}Staff Dashboard{% endblock %}
+{% block title %}Staff Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stats -->
+<div class="row g-2 mb-3 stat-row">
+    <div class="col-6 col-xl-2">
+        <div class="dash-stat">
+            <div class="dash-stat-icon orange"><i class="bi bi-box-seam"></i></div>
+            <div>
+                <div class="dash-stat-val">{{ stats.total_shipments }}</div>
+                <div class="dash-stat-lbl">Total Orders</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-2">
+        <div class="dash-stat">
+            <div class="dash-stat-icon blue"><i class="bi bi-truck"></i></div>
+            <div>
+                <div class="dash-stat-val">{{ stats.active }}</div>
+                <div class="dash-stat-lbl">Active</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-2">
+        <div class="dash-stat">
+            <div class="dash-stat-icon green"><i class="bi bi-check-circle"></i></div>
+            <div>
+                <div class="dash-stat-val">{{ stats.delivered }}</div>
+                <div class="dash-stat-lbl">Delivered</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-2">
+        <div class="dash-stat">
+            <div class="dash-stat-icon red"><i class="bi bi-x-circle"></i></div>
+            <div>
+                <div class="dash-stat-val">{{ stats.cancelled }}</div>
+                <div class="dash-stat-lbl">Cancelled</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-2">
+        <div class="dash-stat">
+            <div class="dash-stat-icon pink"><i class="bi bi-arrow-return-left"></i></div>
+            <div>
+                <div class="dash-stat-val">{{ stats.returned }}</div>
+                <div class="dash-stat-lbl">Returned</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-2">
+        <div class="dash-stat dash-stat-highlight">
+            <div class="dash-stat-icon orange-fill"><i class="bi bi-wallet2"></i></div>
+            <div>
+                <div class="dash-stat-val" style="color: var(--orange);">Rs. {{ stats.revenue|floatformat:"2g"|intcomma }} </div>
+                <div class="dash-stat-lbl">Revenue</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-2 mb-3">
+    <!-- Pending Orders -->
+    <div class="col-lg-5">
+        <div class="dash-card h-100">
+            <div class="dash-card-head">
+                <span><i class="bi bi-exclamation-circle"></i> Pending Orders</span>
+                <span class="dash-badge-count">{{ stats.pending }}</span>
+            </div>
+            {% if pending_shipments %}
+            {% for s in pending_shipments %}
+            <div class="dash-list-item">
+                <div>
+                    <span class="tracking-number">{{ s.tracking_number }}</span>
+                    <div class="dash-sub">{{ s.sender_city }} → {{ s.receiver_city }}</div>
+                </div>
+                <a href="{% url 'shipments:detail' s.pk %}" class="btn-outline-custom btn-sm-custom"><i class="bi bi-eye"></i></a>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="dash-empty-sm">No pending orders</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Overview -->
+    <div class="col-lg-3">
+        <div class="dash-card h-100">
+            <div class="dash-card-head"><span><i class="bi bi-people"></i> Overview</span></div>
+            <div class="dash-kv-list">
+                <div class="dash-kv"><span>Customers</span><strong>{{ total_customers }}</strong></div>
+                <div class="dash-kv"><span>Today's Orders</span><strong>{{ stats.today_shipments }}</strong></div>
+                <div class="dash-kv"><span>Delivery Rate</span><strong style="color: var(--green);">{{ stats.delivery_rate }}%</strong></div>
+            </div>
+            <div class="progress-custom mb-3"><div class="progress-fill" style="width: {{ stats.delivery_rate }}%"></div></div>
+            <a href="{% url 'shipments:list' %}" class="btn-outline-custom btn-sm-custom w-100 justify-content-center"><i class="bi bi-list-ul"></i> All Shipments</a>
+        </div>
+    </div>
+
+    <!-- Status Breakdown -->
+    <div class="col-lg-4">
+        <div class="dash-card h-100">
+            <div class="dash-card-head"><span><i class="bi bi-pie-chart"></i> Status Breakdown</span></div>
+            <div class="dash-status-list">
+                <div class="dash-status-row"><span class="badge-status badge-pending">Pending</span><strong>{{ stats.pending }}</strong></div>
+                <div class="dash-status-row"><span class="badge-status badge-picked_up">Picked Up</span><strong>{{ stats.picked_up }}</strong></div>
+                <div class="dash-status-row"><span class="badge-status badge-in_transit">In Transit</span><strong>{{ stats.in_transit }}</strong></div>
+                <div class="dash-status-row"><span class="badge-status badge-out_for_delivery">Out for Delivery</span><strong>{{ stats.out_for_delivery }}</strong></div>
+                <div class="dash-status-row"><span class="badge-status badge-delivered">Delivered</span><strong>{{ stats.delivered }}</strong></div>
+                <div class="dash-status-row"><span class="badge-status badge-cancelled">Cancelled</span><strong>{{ stats.cancelled }}</strong></div>
+                <div class="dash-status-row"><span class="badge-status badge-returned">Returned</span><strong>{{ stats.returned }}</strong></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Orders -->
+<div class="dash-card" style="padding: 0; overflow: hidden;">
+    <div class="dash-card-head" style="padding: 12px 16px; border-bottom: 1px solid var(--gray-100);">
+        <span><i class="bi bi-clock-history"></i> Recent Orders</span>
+        <a href="{% url 'shipments:list' %}" class="btn-outline-custom btn-sm-custom">View All</a>
+    </div>
+    {% if recent_shipments %}
+    <div class="table-responsive">
+        <table class="table-custom">
+            <thead><tr><th>Tracking #</th><th>Sender</th><th>Receiver</th><th>Route</th><th>Price</th><th>Status</th><th>Date</th><th></th></tr></thead>
+            <tbody>
+                {% for s in recent_shipments %}
+                <tr>
+                    <td><span class="tracking-number">{{ s.tracking_number }}</span></td>
+                    <td style="font-weight: 500; color: var(--gray-700);">{{ s.sender_name }}</td>
+                    <td style="font-weight: 500; color: var(--gray-700);">{{ s.receiver_name }}</td>
+                    <td>{{ s.sender_city }} <i class="bi bi-arrow-right" style="font-size: 10px; color: var(--gray-300);"></i> {{ s.receiver_city }}</td>
+                    <td style="font-weight: 600; color: var(--gray-800);">Rs. {{ s.price|intcomma }}</td>
+                    <td><span class="badge-status badge-{{ s.status }}">{{ s.get_status_display }}</span></td>
+                    <td style="font-size: 12px; color: var(--gray-400);">{{ s.created_at|date:"M d" }}</td>
+                    <td><a href="{% url 'shipments:detail' s.pk %}" class="btn-outline-custom btn-sm-custom"><i class="bi bi-eye"></i></a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="dash-empty"><i class="bi bi-inbox"></i><div class="dash-empty-text">No shipments yet.</div></div>
+    {% endif %}
+</div>
+{% endblock %}

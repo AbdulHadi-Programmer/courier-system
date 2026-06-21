@@ -1,0 +1,192 @@
+{% extends 'core/base.html' %}
+
+{% block public_content %}
+<!-- Navigation -->
+<div class="home-nav">
+    <div class="home-nav-brand"><i class="bi bi-box-seam-fill"></i> QuickShip</div>
+    <div class="home-nav-links">
+        <a href="{% url 'tracking:track' %}" class="btn-outline-custom btn-sm-custom"><i class="bi bi-search"></i> Track</a>
+        <a href="{% url 'accounts:login' %}" class="btn-outline-custom btn-sm-custom">Sign In</a>
+        <a href="{% url 'accounts:register' %}" class="btn-primary-custom btn-sm-custom">Sign Up</a>
+    </div>
+</div>
+
+<!-- Hero -->
+<section class="home-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 home-hero-content">
+                <span class="home-hero-badge"><i class="bi bi-robot"></i> AI-Powered Courier Platform</span>
+                <h1 class="home-hero-title">Ship faster,<br>track <span>smarter</span></h1>
+                <p class="home-hero-desc">AI-powered chatbot, automated pricing, real-time tracking, and smart delivery management. Built with artificial intelligence to handle your courier operations intelligently.</p>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'accounts:register' %}" class="btn-primary-custom btn-lg-custom">Get Started Free <i class="bi bi-arrow-right"></i></a>
+                    <a href="{% url 'tracking:track' %}" class="btn-outline-custom btn-lg-custom"><i class="bi bi-search"></i> Track Shipment</a>
+                </div>
+            </div>
+            <div class="col-lg-5 offset-lg-1 d-none d-lg-block" style="position: relative; z-index: 1;">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="card-custom text-center" style="border-color: var(--orange-200);">
+                            <div style="font-size: 28px; font-weight: 800; color: var(--orange);"><i class="bi bi-robot"></i></div>
+                            <div style="font-size: 11px; color: var(--gray-400); font-weight: 500;">AI Chatbot</div>
+                        </div>
+                    </div>
+                    <div class="col-6" style="margin-top: 24px;">
+                        <div class="card-custom text-center" style="border-color: #86EFAC;">
+                            <div style="font-size: 28px; font-weight: 800; color: var(--green);">24/7</div>
+                            <div style="font-size: 11px; color: var(--gray-400); font-weight: 500;">Live Tracking</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card-custom text-center" style="border-color: #93C5FD;">
+                            <div style="font-size: 28px; font-weight: 800; color: var(--blue);">3</div>
+                            <div style="font-size: 11px; color: var(--gray-400); font-weight: 500;">User Roles</div>
+                        </div>
+                    </div>
+                    <div class="col-6" style="margin-top: 24px;">
+                        <div class="card-custom text-center" style="border-color: var(--orange-200);">
+                            <div style="font-size: 28px; font-weight: 800; color: var(--purple);">Instant</div>
+                            <div style="font-size: 11px; color: var(--gray-400); font-weight: 500;">Auto Pricing</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="home-features">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h2 style="font-size: 24px; font-weight: 700; color: var(--gray-900); margin-bottom: 6px;">Powerful AI-Driven Features</h2>
+            <p style="font-size: 14px; color: var(--gray-400);">Everything you need to manage courier operations with artificial intelligence</p>
+        </div>
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <div class="home-feature-card">
+                    <div class="home-feature-icon stat-icon-primary"><i class="bi bi-robot"></i></div>
+                    <h6>AI Chatbot</h6>
+                    <p>Ask questions about shipments, tracking, pricing — get instant AI-powered answers from real data</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="home-feature-card">
+                    <div class="home-feature-icon stat-icon-info"><i class="bi bi-calculator"></i></div>
+                    <h6>Auto Pricing</h6>
+                    <p>AI calculates price based on weight, quantity, package type & service type automatically</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="home-feature-card">
+                    <div class="home-feature-icon stat-icon-success"><i class="bi bi-geo-alt"></i></div>
+                    <h6>Real-Time Tracking</h6>
+                    <p>Track shipments with live status updates, timeline history & progress visualization</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="home-feature-card">
+                    <div class="home-feature-icon stat-icon-warning"><i class="bi bi-clock-history"></i></div>
+                    <h6>Smart ETA</h6>
+                    <p>Intelligent delivery time estimation calculated automatically by service type</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="home-feature-card">
+                    <div class="home-feature-icon stat-icon-purple"><i class="bi bi-people-fill"></i></div>
+                    <h6>Role-Based Access</h6>
+                    <p>3 dedicated dashboards for Customers, Staff & Admin with role-specific features</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="home-feature-card">
+                    <div class="home-feature-icon stat-icon-danger"><i class="bi bi-search"></i></div>
+                    <h6>Smart Search</h6>
+                    <p>Search shipments by tracking number, name, city, or phone across the platform</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="home-feature-card">
+                    <div class="home-feature-icon stat-icon-info"><i class="bi bi-geo-alt-fill"></i></div>
+                    <h6>Address Book</h6>
+                    <p>Save sender & receiver addresses for quick shipment creation, or enter manually</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="home-feature-card">
+                    <div class="home-feature-icon stat-icon-success"><i class="bi bi-bar-chart-line"></i></div>
+                    <h6>Analytics Dashboard</h6>
+                    <p>Delivery rates, revenue tracking, status breakdowns & real-time platform insights</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How it works -->
+<section class="home-how">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h2 style="font-size: 24px; font-weight: 700; color: var(--gray-900); margin-bottom: 6px;">How It Works</h2>
+            <p style="font-size: 14px; color: var(--gray-400);">Simple 5-step delivery flow powered by AI</p>
+        </div>
+        <div class="row">
+            <div class="col"><div class="home-step"><div class="home-step-num">1</div><h6>Order Placed</h6><p>Create shipment with auto pricing & ETA</p></div></div>
+            <div class="col"><div class="home-step"><div class="home-step-num">2</div><h6>Picked Up</h6><p>Package collected from sender</p></div></div>
+            <div class="col"><div class="home-step"><div class="home-step-num">3</div><h6>In Transit</h6><p>On the way to destination</p></div></div>
+            <div class="col"><div class="home-step"><div class="home-step-num">4</div><h6>Out for Delivery</h6><p>Last mile delivery in progress</p></div></div>
+            <div class="col"><div class="home-step"><div class="home-step-num">5</div><h6>Delivered</h6><p>Successfully delivered!</p></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- AI Section -->
+<section class="home-features" style="background: var(--white);">
+    <div class="container">
+        <div class="text-center mb-4">
+            <span class="home-hero-badge" style="margin-bottom: 12px;"><i class="bi bi-robot"></i> AI Integration</span>
+            <h2 style="font-size: 24px; font-weight: 700; color: var(--gray-900); margin-bottom: 6px;">Built-in AI Chatbot Assistant</h2>
+            <p style="font-size: 14px; color: var(--gray-400); max-width: 500px; margin: 0 auto;">Ask anything about your shipments and get instant, intelligent answers powered by AI</p>
+        </div>
+        <div class="row g-3 justify-content-center">
+            <div class="col-md-4">
+                <div class="home-feature-card" style="text-align: left;">
+                    <div class="home-feature-icon stat-icon-primary" style="margin-bottom: 10px;"><i class="bi bi-chat-dots"></i></div>
+                    <h6>Ask About Shipments</h6>
+                    <p>"Where is my shipment?"<br>"How many deliveries do I have?"<br>"Track TRK123456789012"</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="home-feature-card" style="text-align: left;">
+                    <div class="home-feature-icon stat-icon-success" style="margin-bottom: 10px;"><i class="bi bi-lightning-charge"></i></div>
+                    <h6>Instant Answers</h6>
+                    <p>"How is pricing calculated?"<br>"What service types are available?"<br>"How do I create a shipment?"</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="home-feature-card" style="text-align: left;">
+                    <div class="home-feature-icon stat-icon-info" style="margin-bottom: 10px;"><i class="bi bi-shield-check"></i></div>
+                    <h6>Smart & Secure</h6>
+                    <p>Real data from your account<br>Role-based responses<br>Conversation memory</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="home-cta">
+    <div class="container">
+        <h2>Ready to ship smarter with AI?</h2>
+        <p>Join QuickShip today — AI-powered courier management, free to get started.</p>
+        <a href="{% url 'accounts:register' %}" class="btn-primary-custom btn-lg-custom">Create Free Account <i class="bi bi-arrow-right"></i></a>
+    </div>
+</section>
+
+<footer class="home-footer">
+    <div class="container">
+        <p>&copy; 2026 QuickShip. AI-Powered Courier Management System.</p>
+    </div>
+</footer>
+{% endblock %}

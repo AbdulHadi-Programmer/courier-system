@@ -1,0 +1,87 @@
+{% extends 'core/base.html' %}
+{% load humanize %}
+
+{% block page_title %}Shipment Management{% endblock %}
+{% block title %}Shipment Management{% endblock %}
+
+{% block content %}
+<!-- Toolbar -->
+<div class="sl-toolbar">
+    <div class="sl-filters">
+        <a href="{% url 'administration:shipment_management' %}{% if search_query %}?q={{ search_query }}{% endif %}" class="sl-filter {% if not current_status %}active{% endif %}">All</a>
+        {% for value, label in status_choices %}
+        <a href="?status={{ value }}{% if search_query %}&q={{ search_query }}{% endif %}" class="sl-filter {% if current_status == value %}active{% endif %}">{{ label }}</a>
+        {% endfor %}
+    </div>
+    <div class="sl-right">
+        <form method="get" class="sl-search">
+            {% if current_status %}<input type="hidden" name="status" value="{{ current_status }}">{% endif %}
+            <i class="bi bi-search"></i>
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Search shipments...">
+            {% if search_query %}
+            <a href="{% url 'administration:shipment_management' %}{% if current_status %}?status={{ current_status }}{% endif %}" class="sl-search-clear"><i class="bi bi-x"></i></a>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+{% if search_query %}
+<div class="sl-result-info">
+    <i class="bi bi-funnel-fill"></i> Results for "<strong>{{ search_query }}</strong>" &middot; {{ shipments|length }} found
+</div>
+{% endif %}
+
+{% if shipments %}
+<div class="dash-card" style="padding: 0; overflow: hidden;">
+    <div class="table-responsive">
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>Tracking #</th>
+                    <th>Sender</th>
+                    <th>Receiver</th>
+                    <th>Route</th>
+                    <th>Service</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in shipments %}
+                <tr>
+                    <td><span class="tracking-number">{{ s.tracking_number }}</span></td>
+                    <td>
+                        <div style="font-weight: 500; color: var(--gray-700); font-size: 12px;">{{ s.sender_name }}</div>
+                    </td>
+                    <td>
+                        <div style="font-weight: 600; color: var(--gray-800); font-size: 12px;">{{ s.receiver_name }}</div>
+                        <div style="font-size: 10px; color: var(--gray-400);">{{ s.receiver_phone }}</div>
+                    </td>
+                    <td style="font-size: 12px;">{{ s.sender_city }} <i class="bi bi-arrow-right" style="font-size: 9px; color: var(--gray-300);"></i> {{ s.receiver_city }}</td>
+                    <td style="font-size: 12px;">{{ s.get_service_type_display }}</td>
+                    <td style="font-weight: 600; color: var(--gray-800); font-size: 12px;">Rs. {{ s.price|intcomma }}</td>
+                    <td><span class="badge-status badge-{{ s.status }}">{{ s.get_status_display }}</span></td>
+                    <td style="font-size: 11px; color: var(--gray-400);">{{ s.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="{% url 'shipments:detail' s.pk %}" class="btn-outline-custom btn-sm-custom" title="View"><i class="bi bi-eye"></i></a>
+                            <a href="{% url 'administration:delete_shipment' s.pk %}" class="btn-danger-custom" title="Delete" onclick="return confirm('Delete shipment {{ s.tracking_number }}? This cannot be undone.')"><i class="bi bi-trash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="dash-card dash-empty" style="padding: 48px 20px;">
+    <i class="bi bi-box-seam"></i>
+    <div class="dash-empty-title">No shipments found</div>
+    <div class="dash-empty-text">{% if search_query %}No shipments match your search.{% elif current_status %}No shipments with this status.{% else %}No shipments in the system yet.{% endif %}</div>
+</div>
+{% endif %}
+{% endblock %}
+

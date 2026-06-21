@@ -1,0 +1,310 @@
+{% extends 'core/base.html' %}
+
+{% block page_title %}New Shipment{% endblock %}
+{% block title %}New Shipment{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <form method="post" id="shipmentForm">
+            {% csrf_token %}
+
+            {% if form.errors %}
+            <div class="alert-custom alert-danger-custom">
+                <i class="bi bi-exclamation-circle"></i>
+                <div>{% for field in form %}{% for error in field.errors %}<div>{{ field.label }}: {{ error }}</div>{% endfor %}{% endfor %}</div>
+            </div>
+            {% endif %}
+
+            <!-- Hidden fields for address data -->
+            <input type="hidden" name="sender_name" id="h_sender_name" value="{{ form.sender_name.value|default:'' }}">
+            <input type="hidden" name="sender_phone" id="h_sender_phone" value="{{ form.sender_phone.value|default:'' }}">
+            <input type="hidden" name="sender_city" id="h_sender_city" value="{{ form.sender_city.value|default:'' }}">
+            <input type="hidden" name="sender_address" id="h_sender_address" value="{{ form.sender_address.value|default:'' }}">
+            <input type="hidden" name="receiver_name" id="h_receiver_name" value="{{ form.receiver_name.value|default:'' }}">
+            <input type="hidden" name="receiver_phone" id="h_receiver_phone" value="{{ form.receiver_phone.value|default:'' }}">
+            <input type="hidden" name="receiver_city" id="h_receiver_city" value="{{ form.receiver_city.value|default:'' }}">
+            <input type="hidden" name="receiver_address" id="h_receiver_address" value="{{ form.receiver_address.value|default:'' }}">
+
+            <div class="row g-3">
+                <!-- LEFT: From & To Address -->
+                <div class="col-lg-7">
+                    <!-- From Address -->
+                    <div class="card-custom card-no-hover mb-3" style="animation: fadeUp 0.3s ease;">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--orange-light); color: var(--orange); display: flex; align-items: center; justify-content: center; font-size: 12px;"><i class="bi bi-arrow-up"></i></div>
+                                <span style="font-size: 14px; font-weight: 600; color: var(--gray-900);">From (Sender)</span>
+                            </div>
+                            <div class="addr-toggle">
+                                <button type="button" class="addr-toggle-btn active" data-mode="saved" onclick="switchMode('from', 'saved')"><i class="bi bi-bookmark-fill"></i> Saved</button>
+                                <button type="button" class="addr-toggle-btn" data-mode="manual" onclick="switchMode('from', 'manual')"><i class="bi bi-pencil-fill"></i> Manual</button>
+                            </div>
+                        </div>
+
+                        <!-- Saved Address Mode -->
+                        <div id="fromSavedMode">
+                            {% if from_addresses %}
+                            <select id="fromAddressSelect" class="form-select mb-2" onchange="selectAddress('from')">
+                                <option value="">-- Select sender address --</option>
+                                {% for addr in from_addresses %}
+                                <option value="{{ addr.pk }}"
+                                    data-name="{{ addr.full_name }}"
+                                    data-phone="{{ addr.phone }}"
+                                    data-city="{{ addr.city }}"
+                                    data-address="{{ addr.address }}"
+                                    {% if selected_from == addr.pk|stringformat:"d" %}selected{% endif %}>
+                                    {% if addr.label %}{{ addr.label }} — {% endif %}{{ addr.full_name }}, {{ addr.city }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div id="fromPreview" class="address-preview" style="display: none;">
+                                <div class="row g-1">
+                                    <div class="col-6"><span class="detail-label">Name</span><div class="detail-value" id="fromP_name"></div></div>
+                                    <div class="col-6"><span class="detail-label">Phone</span><div class="detail-value" id="fromP_phone"></div></div>
+                                    <div class="col-4"><span class="detail-label">City</span><div class="detail-value" id="fromP_city"></div></div>
+                                    <div class="col-8"><span class="detail-label">Address</span><div class="detail-value" id="fromP_address" style="font-weight: 500; color: var(--gray-600);"></div></div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div style="text-align: center; padding: 16px; background: var(--gray-50); border-radius: 8px;">
+                                <p style="font-size: 13px; color: var(--gray-400); margin: 0 0 8px;">No sender addresses saved</p>
+                                <a href="{% url 'addresses:list' %}?tab=from" class="btn-outline-custom btn-sm-custom"><i class="bi bi-plus-circle"></i> Add From Address</a>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Manual Entry Mode -->
+                        <div id="fromManualMode" style="display: none;">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="from_manual_name" placeholder="Sender name" oninput="syncManual('from')">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Phone</label>
+                                    <input type="text" class="form-control" id="from_manual_phone" placeholder="Phone number" oninput="syncManual('from')">
+                                </div>
+                                <div class="col-5">
+                                    <label class="form-label">City</label>
+                                    <input type="text" class="form-control" id="from_manual_city" placeholder="City" oninput="syncManual('from')">
+                                </div>
+                                <div class="col-7">
+                                    <label class="form-label">Address</label>
+                                    <input type="text" class="form-control" id="from_manual_address" placeholder="Full address" oninput="syncManual('from')">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- To Address -->
+                    <div class="card-custom card-no-hover mb-3" style="animation: fadeUp 0.3s ease backwards; animation-delay: 0.05s;">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--green-light); color: var(--green); display: flex; align-items: center; justify-content: center; font-size: 12px;"><i class="bi bi-arrow-down"></i></div>
+                                <span style="font-size: 14px; font-weight: 600; color: var(--gray-900);">To (Receiver)</span>
+                            </div>
+                            <div class="addr-toggle">
+                                <button type="button" class="addr-toggle-btn active" data-mode="saved" onclick="switchMode('to', 'saved')"><i class="bi bi-bookmark-fill"></i> Saved</button>
+                                <button type="button" class="addr-toggle-btn" data-mode="manual" onclick="switchMode('to', 'manual')"><i class="bi bi-pencil-fill"></i> Manual</button>
+                            </div>
+                        </div>
+
+                        <!-- Saved Address Mode -->
+                        <div id="toSavedMode">
+                            {% if to_addresses %}
+                            <select id="toAddressSelect" class="form-select mb-2" onchange="selectAddress('to')">
+                                <option value="">-- Select receiver address --</option>
+                                {% for addr in to_addresses %}
+                                <option value="{{ addr.pk }}"
+                                    data-name="{{ addr.full_name }}"
+                                    data-phone="{{ addr.phone }}"
+                                    data-city="{{ addr.city }}"
+                                    data-address="{{ addr.address }}"
+                                    {% if selected_to == addr.pk|stringformat:"d" %}selected{% endif %}>
+                                    {% if addr.label %}{{ addr.label }} — {% endif %}{{ addr.full_name }}, {{ addr.city }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div id="toPreview" class="address-preview" style="display: none;">
+                                <div class="row g-1">
+                                    <div class="col-6"><span class="detail-label">Name</span><div class="detail-value" id="toP_name"></div></div>
+                                    <div class="col-6"><span class="detail-label">Phone</span><div class="detail-value" id="toP_phone"></div></div>
+                                    <div class="col-4"><span class="detail-label">City</span><div class="detail-value" id="toP_city"></div></div>
+                                    <div class="col-8"><span class="detail-label">Address</span><div class="detail-value" id="toP_address" style="font-weight: 500; color: var(--gray-600);"></div></div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div style="text-align: center; padding: 16px; background: var(--gray-50); border-radius: 8px;">
+                                <p style="font-size: 13px; color: var(--gray-400); margin: 0 0 8px;">No receiver addresses saved</p>
+                                <a href="{% url 'addresses:list' %}?tab=to" class="btn-outline-custom btn-sm-custom"><i class="bi bi-plus-circle"></i> Add To Address</a>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Manual Entry Mode -->
+                        <div id="toManualMode" style="display: none;">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="to_manual_name" placeholder="Receiver name" oninput="syncManual('to')">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Phone</label>
+                                    <input type="text" class="form-control" id="to_manual_phone" placeholder="Phone number" oninput="syncManual('to')">
+                                </div>
+                                <div class="col-5">
+                                    <label class="form-label">City</label>
+                                    <input type="text" class="form-control" id="to_manual_city" placeholder="City" oninput="syncManual('to')">
+                                </div>
+                                <div class="col-7">
+                                    <label class="form-label">Address</label>
+                                    <input type="text" class="form-control" id="to_manual_address" placeholder="Full address" oninput="syncManual('to')">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Package Details + Submit -->
+                <div class="col-lg-5">
+                    <div class="card-custom card-no-hover mb-3" style="animation: fadeUp 0.3s ease backwards; animation-delay: 0.08s;">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--yellow-light); color: var(--yellow); display: flex; align-items: center; justify-content: center; font-size: 12px;"><i class="bi bi-box-seam"></i></div>
+                            <span style="font-size: 14px; font-weight: 600; color: var(--gray-900);">Package Details</span>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6"><label class="form-label">Weight (KG)</label>{{ form.weight }}</div>
+                            <div class="col-6"><label class="form-label">Quantity</label>{{ form.quantity }}</div>
+                            <div class="col-12"><label class="form-label">Package Type</label>{{ form.package_type }}</div>
+                            <div class="col-12"><label class="form-label">Service Type</label>{{ form.service_type }}</div>
+                            <div class="col-12"><label class="form-label">Description <span style="font-weight: 400; color: var(--gray-400);">(optional)</span></label>{{ form.description }}</div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2" style="animation: fadeUp 0.3s ease backwards; animation-delay: 0.1s;">
+                        <button type="submit" class="btn-primary-custom justify-content-center" id="submitBtn"><i class="bi bi-send"></i> Place Order</button>
+                        <a href="{% url 'shipments:list' %}" class="btn-outline-custom justify-content-center">Cancel</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<style>
+.address-preview {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 12px;
+}
+.addr-toggle {
+    display: flex; gap: 4px;
+    background: var(--gray-100); border-radius: 6px; padding: 3px;
+}
+.addr-toggle-btn {
+    padding: 4px 12px; border-radius: 5px; font-size: 11px; font-weight: 600;
+    border: none; background: transparent; color: var(--gray-500);
+    cursor: pointer; transition: all 0.15s;
+    display: inline-flex; align-items: center; gap: 4px;
+}
+.addr-toggle-btn.active {
+    background: var(--orange); color: #fff;
+    box-shadow: 0 1px 4px rgba(249,115,22,0.2);
+}
+.addr-toggle-btn:hover:not(.active) { color: var(--gray-700); }
+</style>
+<script>
+function switchMode(type, mode) {
+    var savedEl = document.getElementById(type === 'from' ? 'fromSavedMode' : 'toSavedMode');
+    var manualEl = document.getElementById(type === 'from' ? 'fromManualMode' : 'toManualMode');
+    var prefix = type === 'from' ? 'sender' : 'receiver';
+
+    // Update toggle buttons
+    var card = savedEl.closest('.card-custom');
+    card.querySelectorAll('.addr-toggle-btn').forEach(function(btn) {
+        btn.classList.toggle('active', btn.getAttribute('data-mode') === mode);
+    });
+
+    if (mode === 'saved') {
+        savedEl.style.display = 'block';
+        manualEl.style.display = 'none';
+        // Clear manual fields
+        document.getElementById(type + '_manual_name').value = '';
+        document.getElementById(type + '_manual_phone').value = '';
+        document.getElementById(type + '_manual_city').value = '';
+        document.getElementById(type + '_manual_address').value = '';
+        // Re-sync from dropdown
+        selectAddress(type);
+    } else {
+        savedEl.style.display = 'none';
+        manualEl.style.display = 'block';
+        // Clear hidden fields (will be filled by manual inputs)
+        document.getElementById('h_' + prefix + '_name').value = '';
+        document.getElementById('h_' + prefix + '_phone').value = '';
+        document.getElementById('h_' + prefix + '_city').value = '';
+        document.getElementById('h_' + prefix + '_address').value = '';
+        // Reset dropdown
+        var sel = document.getElementById(type === 'from' ? 'fromAddressSelect' : 'toAddressSelect');
+        if (sel) sel.selectedIndex = 0;
+        var preview = document.getElementById(type === 'from' ? 'fromPreview' : 'toPreview');
+        if (preview) preview.style.display = 'none';
+    }
+}
+
+function syncManual(type) {
+    var prefix = type === 'from' ? 'sender' : 'receiver';
+    document.getElementById('h_' + prefix + '_name').value = document.getElementById(type + '_manual_name').value;
+    document.getElementById('h_' + prefix + '_phone').value = document.getElementById(type + '_manual_phone').value;
+    document.getElementById('h_' + prefix + '_city').value = document.getElementById(type + '_manual_city').value;
+    document.getElementById('h_' + prefix + '_address').value = document.getElementById(type + '_manual_address').value;
+}
+
+function selectAddress(type) {
+    var selectId = type === 'from' ? 'fromAddressSelect' : 'toAddressSelect';
+    var prefix = type === 'from' ? 'sender' : 'receiver';
+    var previewId = type === 'from' ? 'fromPreview' : 'toPreview';
+    var pPrefix = type === 'from' ? 'fromP' : 'toP';
+
+    var sel = document.getElementById(selectId);
+    if (!sel) return;
+    var opt = sel.options[sel.selectedIndex];
+    var preview = document.getElementById(previewId);
+
+    if (!sel.value) {
+        preview.style.display = 'none';
+        document.getElementById('h_' + prefix + '_name').value = '';
+        document.getElementById('h_' + prefix + '_phone').value = '';
+        document.getElementById('h_' + prefix + '_city').value = '';
+        document.getElementById('h_' + prefix + '_address').value = '';
+        return;
+    }
+
+    var name = opt.getAttribute('data-name') || '';
+    var phone = opt.getAttribute('data-phone') || '';
+    var city = opt.getAttribute('data-city') || '';
+    var address = opt.getAttribute('data-address') || '';
+
+    document.getElementById('h_' + prefix + '_name').value = name;
+    document.getElementById('h_' + prefix + '_phone').value = phone;
+    document.getElementById('h_' + prefix + '_city').value = city;
+    document.getElementById('h_' + prefix + '_address').value = address;
+
+    document.getElementById(pPrefix + '_name').textContent = name;
+    document.getElementById(pPrefix + '_phone').textContent = phone;
+    document.getElementById(pPrefix + '_city').textContent = city;
+    document.getElementById(pPrefix + '_address').textContent = address;
+    preview.style.display = 'block';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var fromSel = document.getElementById('fromAddressSelect');
+    var toSel = document.getElementById('toAddressSelect');
+    if (fromSel && fromSel.value) selectAddress('from');
+    if (toSel && toSel.value) selectAddress('to');
+});
+</script>
+{% endblock %}

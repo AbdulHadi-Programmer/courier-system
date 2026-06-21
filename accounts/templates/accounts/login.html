@@ -1,0 +1,36 @@
+{% extends 'core/base.html' %}
+
+{% block public_content %}
+<div class="auth-page">
+    <div class="auth-visual">
+        <div class="auth-visual-brand"><i class="bi bi-box-seam-fill"></i> QuickShip</div>
+        <div class="auth-visual-content">
+            <div class="auth-visual-icon"><i class="bi bi-truck"></i></div>
+            <h3 class="auth-visual-title">Fast & reliable courier management</h3>
+            <p class="auth-visual-desc">Track shipments, auto-calculate prices, and manage deliveries with intelligent automation.</p>
+            <ul class="auth-visual-features">
+                <li><i class="bi bi-calculator"></i> Auto Pricing</li>
+                <li><i class="bi bi-geo-alt"></i> Live Tracking</li>
+                <li><i class="bi bi-clock-history"></i> Smart ETA</li>
+                <li><i class="bi bi-bar-chart"></i> Analytics</li>
+            </ul>
+        </div>
+    </div>
+    <div class="auth-form-side">
+        <div class="auth-form-box">
+            <h3 class="auth-form-title">Welcome back</h3>
+            <p class="auth-form-subtitle">Sign in to your account</p>
+            {% if form.errors %}
+            <div class="alert-custom alert-danger-custom"><i class="bi bi-exclamation-circle"></i> Invalid username or password.</div>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3"><label class="form-label">Username</label>{{ form.username }}</div>
+                <div class="mb-3"><label class="form-label">Password</label>{{ form.password }}</div>
+                <button type="submit" class="btn-primary-custom w-100 justify-content-center" style="padding: 9px;">Sign in <i class="bi bi-arrow-right"></i></button>
+            </form>
+            <p class="text-center mt-4 mb-0 auth-footer">Don't have an account? <a href="{% url 'accounts:register' %}">Create one</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

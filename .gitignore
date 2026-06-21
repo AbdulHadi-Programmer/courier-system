@@ -1,0 +1,44 @@
+# ==========================================
+# 1. Python Cache and Compiled Files
+# ==========================================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ==========================================
+# 2. Virtual Environments (Never track these!)
+# ==========================================
+venv/
+.venv/
+env/
+ENV/
+
+# ==========================================
+# 3. Databases and Local State
+# ==========================================
+*.sqlite3
+*.sqlite3-journal
+
+# ==========================================
+# 4. Environment Variables and Secrets
+# ==========================================
+.env
+.secrets
+local_settings.py
+
+# ==========================================
+# 5. Media and Static Files
+# ==========================================
+# Ignore user-uploaded assets in production
+media/
+# Optional: Ignore gathered static files if collected locally
+staticfiles/
+
+# ==========================================
+# 6. IDE, System, and OS Files
+# ==========================================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

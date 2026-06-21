@@ -1,0 +1,45 @@
+{% extends 'core/base.html' %}
+
+{% block public_content %}
+<div class="auth-page">
+    <div class="auth-visual">
+        <div class="auth-visual-brand"><i class="bi bi-box-seam-fill"></i> QuickShip</div>
+        <div class="auth-visual-content">
+            <div class="auth-visual-icon"><i class="bi bi-box-seam"></i></div>
+            <h3 class="auth-visual-title">Start shipping smarter today</h3>
+            <p class="auth-visual-desc">Join QuickShip — free to get started, no credit card required.</p>
+            <ul class="auth-visual-features">
+                <li><i class="bi bi-check-circle"></i> Free to start</li>
+                <li><i class="bi bi-check-circle"></i> Instant setup</li>
+                <li><i class="bi bi-check-circle"></i> 5+ AI ops</li>
+                <li><i class="bi bi-check-circle"></i> Full analytics</li>
+            </ul>
+        </div>
+    </div>
+    <div class="auth-form-side">
+        <div class="auth-form-box auth-form-box-wide">
+            <h3 class="auth-form-title">Create account</h3>
+            <p class="auth-form-subtitle">Fill in your details to get started</p>
+            {% if form.errors %}
+            <div class="alert-custom alert-danger-custom"><i class="bi bi-exclamation-circle"></i>
+                <div>{% for field in form %}{% for error in field.errors %}<div>{{ error }}</div>{% endfor %}{% endfor %}{% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}</div>
+            </div>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-6"><label class="form-label">First Name</label>{{ form.first_name }}</div>
+                    <div class="col-6"><label class="form-label">Last Name</label>{{ form.last_name }}</div>
+                    <div class="col-12"><label class="form-label">Username</label>{{ form.username }}</div>
+                    <div class="col-6"><label class="form-label">Email</label>{{ form.email }}</div>
+                    <div class="col-6"><label class="form-label">Phone</label>{{ form.phone }}</div>
+                    <div class="col-6"><label class="form-label">Password</label>{{ form.password1 }}</div>
+                    <div class="col-6"><label class="form-label">Confirm Password</label>{{ form.password2 }}</div>
+                </div>
+                <button type="submit" class="btn-primary-custom w-100 justify-content-center mt-4" style="padding: 9px;">Create account <i class="bi bi-arrow-right"></i></button>
+            </form>
+            <p class="text-center mt-4 mb-0 auth-footer">Already have an account? <a href="{% url 'accounts:login' %}">Sign in</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
