@@ -4,13 +4,16 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.db.models import Sum
-
 from shipments.models import Shipment
+
 import os 
 from dotenv import load_dotenv
 
+# 1. You must explicitly call the function
+load_dotenv() 
+ 
 GROQ_API_KEY = os.getenv("GROQ_API")
-
+# print(GROQ_API_KEY)
 
 def _build_context(user):
     """Build context string with user's real data from the database."""
